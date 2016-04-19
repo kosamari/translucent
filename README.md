@@ -2,7 +2,8 @@ Translucent
 ===========
 
 Turn any image into PNG file with a translucent pixel so that Twitter won't use JPEG for your image.
-Download [OSX app here](https://github.com/kosamari/translucent/raw/master/translucent.zip) or build it from source.
+
+Try [web version](http://kosamari.github.io/scrolly-slides), download [OSX app](https://github.com/kosamari/translucent/raw/master/translucent.zip) or build it for your platform from source.
 
 ## Why?
 Twitter use JPEG to any opaque image uploaded regardless of original file format (which drives me nuts 😖), exception is PNG with transparency. This app will turn a single pixel on top left corner to 99.6% opacity (hardly any different from original) and export as PNG.

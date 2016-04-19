@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>translucent</title>
+    <style type="text/css">
+    @import url(https://fonts.googleapis.com/css?family=Copse);
+
+    *{
+      background-color: #F5F4F0;
+      font-family: 'Copse', serif
+    }
+
+    #input {
+      width: 0px;
+      height: 0px;
+      opacity: 0;
+      overflow: hidden;
+      position: absolute;
+      z-index: -1;
+    }
+    #input + label {
+      width:99%;
+      min-width: 250px;
+      font-size: 1em;
+      padding:5px;
+      color: #f3f3f3;
+      background-color: #777;
+      display: inline-block;
+      box-shadow: 1px 1px #555;
+      text-align: center;
+    }
+    #input:focus + label,
+    #input + label:hover {
+      background-color: #999;
+    }
+    #input:focus + label {
+      outline: 1px dotted #000;
+      outline: -webkit-focus-ring-color auto 5px;
+    }
+
+    #drop-target{
+      margin-top: 5px;
+      width: 100%;
+      min-width: 250px;
+      height: 50px;
+      border: dashed 2px gray;
+      line-height: 50px;
+      text-align: center;
+      color: #777;
+    }
+    #message{
+      margin: 10px 0px;
+    }
+    button {
+      font-size: 1em;
+      padding:6px;
+      color: white;
+      background-color: #55ACEE;
+      box-shadow: 1px 1px #555;
+      border: none;
+      margin: 5px 0px;
+      width:100%;
+    }
+    button:hover {
+      background-color: #66BDEE;
+    }
+    #container {
+      max-width:500px;
+      min-width: 250px;
+      margin-left: auto;
+      margin-right:auto;
+    }
+    a{
+      text-decoration: none;
+      color: #00144B;
+    }
+
+    </style>
+</head>
+<body>
+  <div id="container">
+    <h1>translucent</h1>
+    <p>Twitter use JPEG to any opaque image uploaded regardless of original file format which adds noise in your image especially when you upload graphics. </p>
+    <p>Exception is PNG with transparency. This app will turn a single pixel on top left corner to 99.6% opacity (hardly any different from original) and export as PNG so your twitter image is kept noise free !</p>
+    <p>Made by <a href="https://twitter.com/kosamari">@kosamari</a>. Code on <a href="https://github.com/kosamari/translucent">github</a>.</p>
+    <input type="file" name="file" id="input" accept="image/*" onchange="loadImage(this.files)" >
+    <label for="input">Choose an image</label>
+    <div id="drop-target">... or Drag an image here</div>
+    <div id="message" hidden></div>
+    <button id="download" hidden>Download</button>
+    <div id="result"></div>
+    <a id="a" hidden></a>
+  </div>
+  <script >
+  var $target = document.getElementById('drop-target')
+  var $download = document.getElementById('download')
+  var $message = document.getElementById('message')
+  var $result = document.getElementById('result')
+  var $download = document.getElementById('download')
+  var $a = document.getElementById('a')
+
+  var canvas = document.createElement('canvas')
+  var ctx = canvas.getContext('2d')
+  var imageData, imageFile, filename
+
+  var reader = new FileReader()
+  var image = new Image()
+
+  function loadImage (src) {
+    $message.hidden = false
+    $message.textContent = 'Processing...'
+    $result.innerHTML = ''
+    reader.readAsDataURL(src[0])
+    filename = src[0].name.split('.')[0]
+  }
+
+  reader.onload = function () {
+    // Create new Image in memory for canvas to use
+    image.src = reader.result
+
+    // Wait for the Image to load
+    image.onload = function () {
+
+      // Setup Canvas & draw image onto it
+      canvas.width = this.width
+      canvas.height = this.height
+      ctx.drawImage(this, 0, 0)
+      imgData = ctx.getImageData(0,0, canvas.width, canvas.height)
+      if (imgData.data[3] >= 255) { imgData.data[3] = 254 }
+      ctx.putImageData(new ImageData(imgData.data, imgData.width, imgData.height), 0, 0)
+
+      $message.hidden = true
+
+      // make an image element and append result div
+      var resultImg = document.createElement('img')
+      resultImg.src = canvas.toDataURL('image/png')
+      resultImg.width = $target.offsetWidth
+
+      // $result.appendChild(resultTitle)
+      $result.appendChild(resultImg)
+
+      $download.hidden = false
+    }
+  }
+
+  $download.addEventListener('click', function (e) {
+    // Create Download Link
+    canvas.toBlob(function (blob) {
+      // Check if image file was made previously & remove
+      if (imageFile !== null) {
+        window.URL.revokeObjectURL(imageFile)
+      }
+      imageFile = window.URL.createObjectURL(blob)
+      $a.download = filename + '-translucent.png'
+      $a.href = imageFile
+      $a.click()
+    }, 'image/png')
+  })
+
+
+  // event listener for drag and drop area
+  $target.addEventListener('dragover', function (e) { 
+    e.preventDefault()
+    $target.textContent= 'Drop it!'
+    $target.style.border = 'solid 2px gray'
+  }, true)
+  $target.addEventListener('drop', function (e) {
+    e.preventDefault()
+    $target.textContent= 'Drag an image here'
+    $target.style.border = 'dashed 2px gray'
+
+    loadImage(e.dataTransfer.files)
+  }, true)
+
+  // toBlob Polyfill
+  if (!HTMLCanvasElement.prototype.toBlob) {
+   Object.defineProperty(HTMLCanvasElement.prototype, 'toBlob', {
+    value: function (callback, type, quality) {
+
+      var binStr = atob(this.toDataURL(type, quality).split(',')[1])
+      var len = binStr.length
+      var arr = new Uint8Array(len)
+
+      for (var i = 0; i < len; i++) {
+        arr[i] = binStr.charCodeAt(i)
+      }
+
+      callback(new Blob( [arr], {type: type || 'image/png'}))
+    }
+   })
+  }
+
+  </script>
+
+</body>
+</html>
