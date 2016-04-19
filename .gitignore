@@ -3,7 +3,7 @@ logs
 *.log
 
 # .app
-observer-darwin-x64
+translucent-darwin-x64
 
 # dependency
 node_modules
