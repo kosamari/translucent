@@ -1,50 +1,45 @@
-var CACHE_NAME = 'translucent_v0'
-
-var PORT = location.port ? ':' + location.port : ''
-var ROOT_URL = location.protocol + '//' + location.hostname + PORT + '/translucent'
-
-var FILES = [
-  ROOT_URL + '/index.html'
+var APP_PREFIX = 'translucent_'
+var VERSION = 'version_1'
+var CACHE_NAME = APP_PREFIX + VERSION
+var URLS = [
+  '/translucent/',
+  '/translucent/index.html'
 ]
 
-var FILE_HASH_TABLE = {}
-FILES.forEach(function (filepath) { FILE_HASH_TABLE[filepath] = true })
-
 self.addEventListener('fetch', function (e) {
-  if (!FILE_HASH_TABLE[e.request.url]) {
+  console.log('fetch request : ' + e.request.url)
+  var _arr = e.request.url.split('/')
+  _arr.slice(0,1)
+  var path = _arr.join('/')
+  if (URLS.indexOf(path) === -1) {
     return
   }
-  console.log('sending file from cache : ' + e.request.url)
-  e.respondWith(caches.match(e.request, {cacheName: CACHE_NAME}))
+  console.log('responding with cache : ' + e.request.url)
+  e.respondWith(caches.match(e.request))
 })
 
 self.addEventListener('install', function (e) {
   e.waitUntil(
     caches.open(CACHE_NAME).then(function (cache) {
-      return Promise.all(FILES.map(function (url) {
-        return fetch(new Request(url)).then(function (response) {
-          if (response.ok) {
-            console.log('adding to cache : ' + response.url)
-            return cache.put(response.url, response)
-          }
-          return Promise.reject('Invalid response.  URL:' + response.url +' Status: ' + response.status)
-        })
-      }))
+      console.log('installing cache : ' + CACHE_NAME)
+      return cache.addAll(URLS)
     })
   )
 })
 
-self.addEventListener('activate', function(e) {
+self.addEventListener('activate', function (e) {
   e.waitUntil(
-    caches.keys().then(function (keys) {
-      var promises = []
-      keys.forEach(function (cacheName) {
-        if (cacheName !== CACHE_NAME) {
-          console.log('deleting cache : ' + cacheName)
-          promises.push(caches.delete(cacheName))
-        }
+    caches.keys().then(function(keyList) {
+      var cacheWhitelist = keyList.filter(function (key) {
+        return key.indexOf(APP_PREFIX)
       })
-      return Promise.all(promises)
+      cacheWhitelist.push(CACHE_NAME)
+      return Promise.all(keyList.map(function (key, i) {
+        if (cacheWhitelist.indexOf(key) === -1) {
+          console.log('deleting cache : ' + keyList[i] )
+          return caches.delete(keyList[i])
+        }
+      }))
     })
   )
 })
