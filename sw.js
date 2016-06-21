@@ -1,20 +1,28 @@
 var APP_PREFIX = 'translucent_'
-var VERSION = 'version_01'
+var VERSION = 'version_02'
 var CACHE_NAME = APP_PREFIX + VERSION
 var URLS = [
   '/translucent/',
   '/translucent/index.html'
 ]
 
+// Respond with cached resources
 self.addEventListener('fetch', function (e) {
   console.log('fetch request : ' + e.request.url)
-  var url = new URL(e.request.url)
-  if (URLS.indexOf(url.pathname) === -1) {
-    console.log('file is not cached : ' + e.request.url)
-    return
-  }
-  console.log('responding with cache : ' + e.request.url)
-  e.respondWith(caches.match(e.request))
+  e.respondWith(
+    caches.match(e.request).then(function (request) {
+      if (request) { // if cache is available, respond with cache
+        console.log('responding with cache : ' + e.request.url)
+        return request
+      } else {       // if there are no cache, try fetching request
+        console.log('file is not cached, fetching : ' + e.request.url)
+        return fetch(e.request)
+      }
+
+      // You can omit if/else for console.log & put one line below here too.
+      // return request || fetch(e.request)
+    })
+  )
 })
 
 self.addEventListener('install', function (e) {
