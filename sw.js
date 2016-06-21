@@ -1,5 +1,5 @@
 var APP_PREFIX = 'translucent_'
-var VERSION = 'version_1'
+var VERSION = 'version_01'
 var CACHE_NAME = APP_PREFIX + VERSION
 var URLS = [
   '/translucent/',
@@ -8,10 +8,9 @@ var URLS = [
 
 self.addEventListener('fetch', function (e) {
   console.log('fetch request : ' + e.request.url)
-  var _arr = e.request.url.split('/')
-  _arr.slice(0,1)
-  var path = _arr.join('/')
-  if (URLS.indexOf(path) === -1) {
+  var url = new URL(e.request.url)
+  if (URLS.indexOf(url.pathname) === -1) {
+    console.log('file is not cached : ' + e.request.url)
     return
   }
   console.log('responding with cache : ' + e.request.url)

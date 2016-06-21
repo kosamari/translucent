@@ -95,7 +95,9 @@
     <a id="a" hidden></a>
   </div>
   <script >
-  navigator.serviceWorker.register('/translucent/sw.js', {scope: '/translucent/'})
+  if (navigator.serviceWorker) {
+    navigator.serviceWorker.register('/translucent/sw.js', {scope: '/translucent/'})
+  }
 
   var $target = document.getElementById('drop-target')
   var $download = document.getElementById('download')
