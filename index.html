@@ -3,9 +3,9 @@
 <head>
     <title>translucent</title>
     <meta name='viewport' content='width=device-width, initial-scale=1, user-scalable=no, maximum-scale=1, minimum-scale=1'/>
-    <meta name="description" content="beautliful image for every tweet">
+    <meta name="description" content="beautiful image for every tweet">
     <link rel="canonical" href="https://kosamari.github.io/translucent" />
-    <style type="text/css">
+    <style>
     @import url(https://fonts.googleapis.com/css?family=Copse);
 
     *{
@@ -51,7 +51,10 @@
       text-align: center;
       color: #777;
     }
-    #message{
+    #drop-target.drop {
+      border: solid 2px gray;
+    }
+    #message {
       margin: 10px 0px;
     }
     button {
@@ -99,6 +102,7 @@
     navigator.serviceWorker.register('/translucent/sw.js', {scope: '/translucent/'})
   }
 
+  var $html = document.documentElement
   var $target = document.getElementById('drop-target')
   var $download = document.getElementById('download')
   var $message = document.getElementById('message')
@@ -167,17 +171,16 @@
   $download.addEventListener('click', downloadFile)
 
   // event listener for drag and drop area
-  $target.addEventListener('dragover', function (e) { 
-    e.preventDefault()
+  $html.addEventListener('dragover', function (event) {
+    event.preventDefault()
     $target.textContent= 'Drop it!'
-    $target.style.border = 'solid 2px gray'
+    $target.classList.add('drop')
   }, true)
-  $target.addEventListener('drop', function (e) {
-    e.preventDefault()
+  $html.addEventListener('drop', function (event) {
+    event.preventDefault()
     $target.textContent= 'Drag an image here'
-    $target.style.border = 'dashed 2px gray'
-
-    loadImage(e.dataTransfer.files)
+    $target.classList.remove('drop')
+    loadImage(event.dataTransfer.files)
   }, true)
 
   // toBlob Polyfill
