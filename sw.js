@@ -1,5 +1,5 @@
 var APP_PREFIX = 'translucent_'
-var VERSION = 'version_02'
+var VERSION = 'version_03' // v.3 includes contribution from @mathias expanding event target to entire page
 var CACHE_NAME = APP_PREFIX + VERSION
 var URLS = [
   '/translucent/',
